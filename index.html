@@ -887,11 +887,13 @@ function toast(msg, color) {
 var _deferredPrompt = null;
 var INSTALL_DISMISSED_KEY = 'imu_install_dismissed_until';
 
-// Register Service Worker
+// ── Register Service Worker ───────────────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('./sw.js')
-      .then(function(reg) { console.log('[PWA] SW registered:', reg.scope); })
+      .then(function(reg) {
+        console.log('[PWA] SW registered:', reg.scope);
+      })
       .catch(function(err) { console.warn('[PWA] SW failed:', err); });
   });
 }
@@ -901,8 +903,6 @@ function isInstalledPWA() {
     || window.navigator.standalone === true;
 }
 
-// Cek apakah popup boleh ditampilkan
-// — belum diinstall, dan belum dismiss dalam 24 jam terakhir
 function canShowInstallPopup() {
   if (isInstalledPWA()) return false;
   var until = localStorage.getItem(INSTALL_DISMISSED_KEY);
@@ -910,30 +910,21 @@ function canShowInstallPopup() {
   return true;
 }
 
-function showInstallPopup(force) {
+function showInstallPopup() {
   if (!canShowInstallPopup()) return;
-  // Tunda sedikit agar halaman sudah load dulu
-  setTimeout(function() {
-    // Hanya tampilkan jika: ada deferredPrompt (bisa auto install), atau force (iOS)
-    if (_deferredPrompt || force) {
-      document.getElementById('installPopup').style.display = 'block';
-    }
-  }, 1500);
+  document.getElementById('installPopup').style.display = 'block';
 }
 
-// Tombol "Nanti" — simpan timestamp, popup muncul lagi kunjungan berikutnya
-// (tepatnya setelah 24 jam, supaya tidak spam tiap kunjungan)
 function dismissInstall() {
   document.getElementById('installPopup').style.display = 'none';
-  // Muncul lagi setelah 24 jam
-  localStorage.setItem(INSTALL_DISMISSED_KEY, Date.now() + 24*60*60*1000);
+  // Muncul lagi setelah 3 hari
+  localStorage.setItem(INSTALL_DISMISSED_KEY, Date.now() + 3*24*60*60*1000);
 }
 
-// Tombol "Install Sekarang"
 function doInstall() {
   document.getElementById('installPopup').style.display = 'none';
   if (_deferredPrompt) {
-    // Trigger native install dialog langsung
+    // Android/Chrome/Edge: trigger native install dialog
     _deferredPrompt.prompt();
     _deferredPrompt.userChoice.then(function(result) {
       if (result.outcome === 'accepted') {
@@ -945,50 +936,41 @@ function doInstall() {
       _deferredPrompt = null;
     });
   } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
-    // iOS: tampilkan modal instruksi (tidak ada cara lain di iOS)
-    showIOSInstallGuide();
+    // iOS Safari: tidak ada beforeinstallprompt, kasih panduan manual
+    var modal = document.getElementById('confirmModal');
+    document.getElementById('modalTitle').textContent = '📱 Install di iPhone/iPad';
+    document.getElementById('modalDesc').innerHTML =
+      '1. Tap tombol <strong>Share</strong> (ikon kotak↑) di toolbar Safari<br><br>' +
+      '2. Scroll ke bawah, tap <strong>"Add to Home Screen"</strong><br><br>' +
+      '3. Tap <strong>"Add"</strong>';
+    document.getElementById('modalConfirmBtn').textContent = 'OK';
+    document.getElementById('modalConfirmBtn').onclick = function() { closeModal(); };
+    modal.classList.add('open');
   } else {
-    // Fallback: coba trigger install via address bar hint
-    toast('💡 Ketuk ikon install (⊕ atau ⬇) di address bar browser', '#1a7fd4');
+    toast('💡 Ketuk ikon ⊕ di address bar untuk install', '#1a7fd4');
   }
 }
 
-function showIOSInstallGuide() {
-  var modal = document.getElementById('confirmModal');
-  document.getElementById('modalTitle').textContent = '📱 Install di iPhone/iPad';
-  document.getElementById('modalDesc').innerHTML = 
-    'Untuk install di iOS:<br><br>' +
-    '1. Tap tombol <strong>Share</strong> (kotak dengan panah ↑) di bawah Safari<br>' +
-    '2. Scroll dan tap <strong>"Add to Home Screen"</strong><br>' +
-    '3. Tap <strong>"Add"</strong>';
-  document.getElementById('modalConfirmBtn').textContent = 'OK, Mengerti';
-  document.getElementById('modalConfirmBtn').onclick = function() { closeModal(); };
-  modal.classList.add('open');
-}
-
-// Tangkap event dari browser (Chrome/Edge/Android)
-// Event ini hanya muncul jika app belum terinstall dan memenuhi PWA criteria
+// ── Tangkap beforeinstallprompt (Android Chrome/Edge) ────────
+// Event ini fired SEBELUM browser menampilkan mini-infobar install
 window.addEventListener('beforeinstallprompt', function(e) {
-  e.preventDefault();
+  e.preventDefault();          // cegah mini-infobar otomatis
   _deferredPrompt = e;
-  // Popup muncul otomatis — klik "Install Sekarang" akan trigger native dialog
-  showInstallPopup(false);
+  // Delay 2 detik agar halaman sudah siap
+  setTimeout(showInstallPopup, 2000);
 });
 
-// Untuk iOS & browser lain — munculkan popup manual setelah delay
+// ── iOS: tidak ada beforeinstallprompt, tampilkan manual ─────
 window.addEventListener('load', function() {
-  // iOS Safari: tidak ada beforeinstallprompt
-  if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream) {
-    showInstallPopup(true); // force=true karena iOS tidak punya beforeinstallprompt
-    return;
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS) {
+    setTimeout(showInstallPopup, 2000);
   }
-  // Android/Chrome: popup akan muncul via beforeinstallprompt event di atas
-  // Tidak perlu fallback manual — jika event tidak muncul, berarti sudah terinstall
-  // atau browser tidak mendukung PWA install
 });
 
-// Setelah diinstall, hapus flag dismiss
+// ── Setelah berhasil install ──────────────────────────────────
 window.addEventListener('appinstalled', function() {
+  document.getElementById('installPopup').style.display = 'none';
   localStorage.removeItem(INSTALL_DISMISSED_KEY);
   toast('✅ IMU Monitor sudah terinstall!', '#16a34a');
 });
