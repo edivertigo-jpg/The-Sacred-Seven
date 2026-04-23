@@ -856,27 +856,71 @@ function dismissInstallBanner() {
 // Tombol "Install Sekarang"
 function triggerInstallBanner() {
   if (_deferredPrompt) {
-    // Simpan referensi lokal & reset global DULU sebelum prompt
+    // Chrome/Edge Android & Desktop — native prompt langsung
     var prompt = _deferredPrompt;
     _deferredPrompt = null;
-
-    // Tampilkan native install dialog DULU, baru sembunyikan banner
     prompt.prompt();
     prompt.userChoice.then(function(choice) {
       if (choice.outcome === 'accepted') {
         localStorage.setItem('pwa-installed', '1');
-        toast('✅ Instalasi diterima!', '#16a34a');
+        toast('✅ IMU Monitor berhasil diinstall!', '#16a34a');
       } else {
-        // User cancel — kembalikan prompt agar bisa dicoba lagi
-        _deferredPrompt = prompt;
+        _deferredPrompt = prompt; // kembalikan jika user cancel
       }
-      hideBanner(); // sembunyikan banner setelah user membuat pilihan
+      hideBanner();
     });
-  } else {
-    // Fallback — panduan manual (iOS Safari tidak support beforeinstallprompt)
-    hideBanner();
-    toast('💡 Buka menu browser (⋮) lalu pilih "Tambahkan ke layar utama"', '#1a7fd4');
+    return;
   }
+
+  // Deteksi browser otomatis, tampilkan panduan yang tepat
+  var ua = navigator.userAgent;
+  var isIOS = /iphone|ipad|ipod/i.test(ua);
+  var isSamsung = /SamsungBrowser/i.test(ua);
+  var isFirefox = /Firefox/i.test(ua);
+
+  hideBanner();
+
+  if (isIOS) {
+    showInstallGuide(
+      '📱 Install di iPhone / iPad',
+      '1. Tap ikon <b>Bagikan</b> ( ⬆️ ) di toolbar bawah Safari<br>2. Scroll ke bawah, pilih <b>"Tambahkan ke Layar Utama"</b><br>3. Tap <b>Tambahkan</b> ✅'
+    );
+  } else if (isSamsung) {
+    showInstallGuide(
+      '📱 Install di Samsung Browser',
+      '1. Tap ikon <b>menu</b> ( ☰ ) kanan bawah<br>2. Pilih <b>"Tambahkan halaman ke"</b><br>3. Pilih <b>"Layar Beranda"</b> ✅'
+    );
+  } else if (isFirefox) {
+    showInstallGuide(
+      '🦊 Install di Firefox',
+      '1. Tap ikon <b>menu</b> ( ⋮ ) kanan atas<br>2. Pilih <b>"Install"</b> atau <b>"Tambahkan ke Layar Utama"</b> ✅'
+    );
+  } else {
+    showInstallGuide(
+      '🌐 Cara Install',
+      '1. Tap ikon <b>menu browser</b> ( ⋮ ) pojok kanan atas<br>2. Pilih <b>"Install App"</b> atau <b>"Tambahkan ke Layar Utama"</b><br>3. Konfirmasi → selesai ✅'
+    );
+  }
+}
+
+// Modal panduan install — lebih jelas dari toast
+function showInstallGuide(title, steps) {
+  var existing = document.getElementById('installGuideModal');
+  if (existing) existing.remove();
+
+  var modal = document.createElement('div');
+  modal.id = 'installGuideModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML =
+    '<div style="background:#fff;border-radius:16px;padding:28px 24px;max-width:360px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.25)">' +
+      '<div style="font-size:17px;font-weight:800;color:#0f2942;margin-bottom:14px">' + title + '</div>' +
+      '<div style="font-size:13px;color:#334155;line-height:1.9">' + steps + '</div>' +
+      '<button onclick="document.getElementById(\'installGuideModal\').remove()" ' +
+        'style="margin-top:20px;width:100%;padding:12px;background:#1a7fd4;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer">Mengerti ✅</button>' +
+    '</div>';
+  document.body.appendChild(modal);
+  // Tap di luar modal untuk tutup
+  modal.addEventListener('click', function(e){ if (e.target === modal) modal.remove(); });
 }
 
 // Tampilkan banner otomatis saat halaman dibuka
