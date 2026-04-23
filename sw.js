@@ -8,8 +8,8 @@ const CACHE_STATIC = 'imu-static-' + APP_VERSION;
 const STATIC_ASSETS = [
   './index.html',
   './manifest.json',
-  './icons/icon-192x192.png',
-  './icons/icon-512x512.png',
+  './icon-192x192.png',
+  './icon-512x512.png',
   'https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap'
 ];
 
@@ -136,8 +136,8 @@ self.addEventListener('push', function(event) {
   var title = data.title || 'IMU Monitor';
   var options = {
     body: data.body || 'Ada notifikasi baru',
-    icon: './icons/icon-192x192.png',
-    badge: './icons/icon-72x72.png'
+    icon: './icon-192x192.png',
+    badge: './icon-192x192.png'
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });

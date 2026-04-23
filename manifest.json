@@ -2,19 +2,19 @@
   "name": "IMU Monitor — The Sacred Seven",
   "short_name": "IMU Monitor",
   "description": "Pemantauan Anamnese IMU The Sacred Seven · RSU Surya Husadha Nusa Dua",
-  "start_url": "/The-Sacred-Seven/index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f0f7ff",
   "theme_color": "#1a7fd4",
   "orientation": "any",
-  "scope": "/The-Sacred-Seven/",
+  "scope": "./",
   "lang": "id",
   "prefer_related_applications": false,
   "icons": [
-    { "src": "icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "categories": ["medical", "productivity"]
 }
