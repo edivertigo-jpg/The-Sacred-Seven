@@ -174,6 +174,26 @@ td:nth-child(2),td:nth-child(3){text-align:left}
 .filter-active{background:var(--al);color:#1a7fd4;border-color:#b3d4ef;font-weight:700}
 
 
+/* ── INSTALL BANNER ─────────────────────────────────────────── */
+#installBanner{
+  position:fixed;bottom:0;left:0;right:0;z-index:9998;
+  background:#fff;border-top:2px solid #1a7fd4;
+  box-shadow:0 -4px 24px rgba(26,127,212,.18);
+  padding:14px 20px;display:flex;align-items:center;gap:14px;
+  transform:translateY(110%);transition:transform .35s cubic-bezier(.4,0,.2,1);
+  flex-wrap:wrap
+}
+#installBanner.show{transform:translateY(0)}
+.install-banner-ico{font-size:32px;flex-shrink:0}
+.install-banner-text{flex:1;min-width:160px}
+.install-banner-text strong{display:block;font-size:13px;font-weight:800;color:#0f2942;margin-bottom:2px}
+.install-banner-text span{font-size:11px;color:#6b8ba4}
+.install-banner-btns{display:flex;gap:8px;flex-shrink:0}
+.btn-install-go{background:#1a7fd4;color:#fff;border:none;padding:10px 20px;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .18s}
+.btn-install-go:hover{background:#1565b0;transform:translateY(-1px)}
+.btn-install-no{background:#f0f7ff;color:#6b8ba4;border:1px solid #cce4f7;padding:10px 14px;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .18s}
+.btn-install-no:hover{color:#0f2942}
+
 /* ── MOBILE RESPONSIVE ─────────────────────────────────────── */
 @media (max-width: 768px) {
   header{padding:0 12px;height:54px}
@@ -240,8 +260,9 @@ td:nth-child(2),td:nth-child(3){text-align:left}
   /* Toast bottom */
   #toast{bottom:14px;right:10px;left:10px;font-size:12px;padding:9px 14px}
   
-  /* Install popup */
-  #installPopup{width:calc(100% - 28px);padding:14px 16px;border-radius:13px}
+  /* Install banner */
+  #installBanner{padding:12px 14px}
+  #installBanner.show{transform:translateY(0)}
 
   /* Modal */
   .modal{padding:20px;border-radius:13px}
@@ -419,108 +440,20 @@ td:nth-child(2),td:nth-child(3){text-align:left}
   </div>
 </div>
 <!-- ═══ PWA Install Popup ═══════════════════════════════════ -->
-<div id="installPopup" style="
-  display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-  z-index:9990;background:#fff;border:1px solid #cce4f7;border-radius:16px;
-  padding:18px 22px;box-shadow:0 8px 40px rgba(15,41,66,.18);
-  width:calc(100% - 48px);max-width:420px;
-  animation:slideUp .35s cubic-bezier(.34,1.56,.64,1)">
-  <style>@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(30px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-/* ── MOBILE RESPONSIVE ─────────────────────────────────────── */
-@media (max-width: 768px) {
-  header{padding:0 12px;height:54px}
-  .logo-img{height:28px}
-  .logo-div{margin:0 10px}
-  .logo-text h1{font-size:11px}
-  .logo-text p{font-size:9px}
-  .hdr-right{gap:5px}
-  .live-pill{padding:3px 8px;font-size:10px}
-  .btn{padding:5px 9px;font-size:11px}
-  .main{padding:10px 10px 40px}
-
-  /* Stats: 2x2 grid di mobile */
-  .stats-grid{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
-  .stat-val{font-size:22px}
-  .stat-bg{font-size:32px}
-
-  /* Mini bars: 4x2 */
-  .mini-bars{grid-template-columns:repeat(4,1fr);gap:5px;padding:10px 12px;margin-bottom:12px}
-  .mbi-lbl{font-size:7.5px}
-  .mbi-val{font-size:11px}
-
-  /* Dokter: 2 per row */
-  .dr-summary{grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:12px}
-  .dr-name{font-size:10px}
-  .dr-skor{font-size:13px}
-
-  /* Form: vertical stack */
-  .form-panel{padding:12px 12px}
-  .form-row{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
-  }
-  .form-row > .fg:first-child{grid-column:1/2}
-  .form-row > .fg:nth-child(2){grid-column:2/3}
-  .form-row > .cg{grid-column:auto}
-  .form-row > .fg:nth-last-child(2){grid-column:1/-1}
-  .form-row > div:last-child{grid-column:1/-1}
-  
-  /* Checkboxes row: 4x2 */
-  .form-row .cg{display:flex;flex-direction:column;align-items:center}
-  .cbox{width:22px;height:22px}
-  .fl{font-size:8px}
-
-  /* Table: full width, compressed */
-  .table-wrap{border-radius:10px}
-  .tbar{padding:8px 10px;gap:6px}
-  .tbar-r{gap:5px;flex-wrap:wrap}
-  .tbar-title{font-size:10px}
-  .sbox input{width:100px;font-size:12px}
-  .fsel{font-size:11px;padding:5px 7px}
-
-  /* Hide less important table columns on mobile */
-  .tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  table{min-width:600px;font-size:11px}
-  thead th{padding:7px 6px;font-size:8px}
-  td{padding:6px 6px}
-
-  /* Filter bar */
-  .filter-bar{padding:8px 10px;gap:6px}
-  .filter-bar-label{font-size:9px}
-
-  /* Toast bottom */
-  #toast{bottom:14px;right:10px;left:10px;font-size:12px;padding:9px 14px}
-  
-  /* Install popup */
-  #installPopup{width:calc(100% - 28px);padding:14px 16px;border-radius:13px}
-
-  /* Modal */
-  .modal{padding:20px;border-radius:13px}
-}
-
-@media (max-width: 480px) {
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
-  .mini-bars{grid-template-columns:repeat(4,1fr)}
-  .dr-summary{grid-template-columns:repeat(2,1fr)}
-  header .btn span, .hdr-right .btn-white span{display:none}
-}
-
-</style>
-  <div style="display:flex;align-items:center;gap:14px">
-    <img src="icons/icon-72x72.png" style="width:48px;height:48px;border-radius:12px;flex-shrink:0">
-    <div style="flex:1;min-width:0">
-      <div style="font-size:13px;font-weight:700;color:#0f2942;margin-bottom:2px">Install IMU Monitor</div>
-      <div style="font-size:11px;color:#6b8ba4;line-height:1.4">Tambahkan ke layar utama untuk akses cepat tanpa buka browser</div>
-    </div>
+<!-- ── PWA INSTALL BANNER ─────────────────────────────────── -->
+<div id="installBanner">
+  <div class="install-banner-ico">📲</div>
+  <div class="install-banner-text">
+    <strong>Install IMU Monitor</strong>
+    <span>Akses lebih cepat langsung dari layar utama HP / laptop Anda</span>
   </div>
-  <div style="display:flex;gap:8px;margin-top:14px">
-    <button onclick="dismissInstall()" style="flex:1;padding:9px;border-radius:8px;border:1px solid #cce4f7;background:#f4faff;color:#6b8ba4;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">Nanti</button>
-    <button onclick="doInstall()" style="flex:2;padding:9px;border-radius:8px;border:none;background:#1a7fd4;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer">
-      ⬇ Install Sekarang
-    </button>
+  <div class="install-banner-btns">
+    <button class="btn-install-go" onclick="triggerInstallBanner()">⬇️ Install Sekarang</button>
+    <button class="btn-install-no" onclick="dismissInstallBanner()">Nanti</button>
   </div>
 </div>
+<!-- ───────────────────────────────────────────────────────── -->
+
 <!-- ══════════════════════════════════════════════════════════ -->
 
 <div id="toast"></div>
@@ -884,96 +817,89 @@ function toast(msg, color) {
 // ═══════════════════════════════════════════════════════════════
 //  PWA: Service Worker + Auto Install Popup
 // ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+//  PWA INSTALL — Pola banner slide-up (sama dengan KTKL)
+// ═══════════════════════════════════════════════════════════════
 var _deferredPrompt = null;
-var INSTALL_DISMISSED_KEY = 'imu_install_dismissed_until';
 
-// ── Register Service Worker ───────────────────────────────────
+function isRunningAsPWA() {
+  return window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true;
+}
+
+// Tangkap event dari browser — simpan prompt, update teks tombol
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  _deferredPrompt = e;
+  var goBtn = document.querySelector('.btn-install-go');
+  if (goBtn) goBtn.textContent = '⬇️ Install Sekarang';
+});
+
+// Setelah berhasil install
+window.addEventListener('appinstalled', function() {
+  _deferredPrompt = null;
+  localStorage.setItem('pwa-installed', '1');
+  hideBanner();
+  toast('✅ IMU Monitor berhasil diinstall!', '#16a34a');
+});
+
+function hideBanner() {
+  var banner = document.getElementById('installBanner');
+  if (banner) banner.classList.remove('show');
+}
+
+// Tombol "Nanti" — TIDAK disimpan, muncul lagi kunjungan berikutnya
+function dismissInstallBanner() {
+  hideBanner();
+}
+
+// Tombol "Install Sekarang"
+function triggerInstallBanner() {
+  if (_deferredPrompt) {
+    hideBanner();
+    _deferredPrompt.prompt();
+    _deferredPrompt.userChoice.then(function(choice) {
+      if (choice.outcome === 'accepted') {
+        localStorage.setItem('pwa-installed', '1');
+        toast('✅ Instalasi diterima!', '#16a34a');
+      }
+      _deferredPrompt = null;
+    });
+  } else {
+    // Fallback — panduan manual
+    hideBanner();
+    toast('💡 Buka menu browser (⋮) lalu pilih "Tambahkan ke layar utama"', '#1a7fd4');
+  }
+}
+
+// Tampilkan banner otomatis saat halaman dibuka
+window.addEventListener('load', function() {
+  if (isRunningAsPWA()) return;
+  if (localStorage.getItem('pwa-installed') === '1') return;
+  // Delay 1.5 detik agar halaman sudah siap
+  setTimeout(function() {
+    var banner = document.getElementById('installBanner');
+    if (banner) banner.classList.add('show');
+  }, 1500);
+});
+
+// Register Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('./sw.js')
-      .then(function(reg) {
-        console.log('[PWA] SW registered:', reg.scope);
-      })
+      .then(function(reg) { console.log('[PWA] SW registered:', reg.scope); })
       .catch(function(err) { console.warn('[PWA] SW failed:', err); });
   });
 }
 
-function isInstalledPWA() {
-  return window.matchMedia('(display-mode: standalone)').matches
-    || window.navigator.standalone === true;
+// Dengarkan pesan update dari SW
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', function(e) {
+    if (e.data && e.data.type === 'SW_UPDATED') {
+      toast('🔄 App diperbarui ke versi terbaru!', '#1a7fd4');
+    }
+  });
 }
-
-function canShowInstallPopup() {
-  if (isInstalledPWA()) return false;
-  var until = localStorage.getItem(INSTALL_DISMISSED_KEY);
-  if (until && Date.now() < parseInt(until)) return false;
-  return true;
-}
-
-function showInstallPopup() {
-  if (!canShowInstallPopup()) return;
-  document.getElementById('installPopup').style.display = 'block';
-}
-
-function dismissInstall() {
-  document.getElementById('installPopup').style.display = 'none';
-  // Muncul lagi setelah 3 hari
-  localStorage.setItem(INSTALL_DISMISSED_KEY, Date.now() + 3*24*60*60*1000);
-}
-
-function doInstall() {
-  document.getElementById('installPopup').style.display = 'none';
-  if (_deferredPrompt) {
-    // Android/Chrome/Edge: trigger native install dialog
-    _deferredPrompt.prompt();
-    _deferredPrompt.userChoice.then(function(result) {
-      if (result.outcome === 'accepted') {
-        localStorage.removeItem(INSTALL_DISMISSED_KEY);
-        toast('✅ IMU Monitor berhasil diinstall!', '#16a34a');
-      } else {
-        toast('ℹ️ Install dibatalkan', '#6b8ba4');
-      }
-      _deferredPrompt = null;
-    });
-  } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
-    // iOS Safari: tidak ada beforeinstallprompt, kasih panduan manual
-    var modal = document.getElementById('confirmModal');
-    document.getElementById('modalTitle').textContent = '📱 Install di iPhone/iPad';
-    document.getElementById('modalDesc').innerHTML =
-      '1. Tap tombol <strong>Share</strong> (ikon kotak↑) di toolbar Safari<br><br>' +
-      '2. Scroll ke bawah, tap <strong>"Add to Home Screen"</strong><br><br>' +
-      '3. Tap <strong>"Add"</strong>';
-    document.getElementById('modalConfirmBtn').textContent = 'OK';
-    document.getElementById('modalConfirmBtn').onclick = function() { closeModal(); };
-    modal.classList.add('open');
-  } else {
-    toast('💡 Ketuk ikon ⊕ di address bar untuk install', '#1a7fd4');
-  }
-}
-
-// ── Tangkap beforeinstallprompt (Android Chrome/Edge) ────────
-// Event ini fired SEBELUM browser menampilkan mini-infobar install
-window.addEventListener('beforeinstallprompt', function(e) {
-  e.preventDefault();          // cegah mini-infobar otomatis
-  _deferredPrompt = e;
-  // Delay 2 detik agar halaman sudah siap
-  setTimeout(showInstallPopup, 2000);
-});
-
-// ── iOS: tidak ada beforeinstallprompt, tampilkan manual ─────
-window.addEventListener('load', function() {
-  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
-  if (isIOS) {
-    setTimeout(showInstallPopup, 2000);
-  }
-});
-
-// ── Setelah berhasil install ──────────────────────────────────
-window.addEventListener('appinstalled', function() {
-  document.getElementById('installPopup').style.display = 'none';
-  localStorage.removeItem(INSTALL_DISMISSED_KEY);
-  toast('✅ IMU Monitor sudah terinstall!', '#16a34a');
-});
 
 
 // Dengarkan pesan dari Service Worker (misalnya ada update)
