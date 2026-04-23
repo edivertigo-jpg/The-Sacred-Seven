@@ -82,7 +82,7 @@ header{position:sticky;top:0;z-index:200;background:#1a7fd4;padding:0 24px;heigh
 .mbi-fill{height:100%;border-radius:4px;transition:width .5s}
 
 /* DOKTER */
-.dr-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:18px}
+.dr-summary{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:18px}
 .dr-card{background:#fff;border:1px solid var(--border);border-radius:11px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:transform .15s,box-shadow .15s}
 .dr-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(26,127,212,.1)}
 .dr-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.3}
@@ -134,7 +134,7 @@ td:nth-child(2),td:nth-child(3){text-align:left}
 .dr-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
 .dc-ade{background:#dbeafe;color:#1d4ed8}.dc-wayan{background:#dcfce7;color:#15803d}
 .dc-wilson{background:#fce7f3;color:#9d174d}.dc-putu{background:#fef9c3;color:#92400e}
-.dc-aenun{background:#ede9fe;color:#6d28d9}
+.dc-aenun{background:#ede9fe;color:#6d28d9}.dc-hendroe{background:#d1fae5;color:#065f46}.dc-nesa{background:#ffedd5;color:#9a3412}
 .score-cell{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:48px}
 .score-num{font-family:'DM Mono',monospace;font-size:11px;font-weight:700}
 .score-bg{width:40px;height:4px;background:#e2eef8;border-radius:4px;overflow:hidden}
@@ -168,7 +168,7 @@ td:nth-child(2),td:nth-child(3){text-align:left}
 .dr-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
 .dc-ade{background:#dbeafe;color:#1d4ed8}.dc-wayan{background:#dcfce7;color:#15803d}
 .dc-wilson{background:#fce7f3;color:#9d174d}.dc-putu{background:#fef9c3;color:#92400e}
-.dc-aenun{background:#ede9fe;color:#6d28d9}
+.dc-aenun{background:#ede9fe;color:#6d28d9}.dc-hendroe{background:#d1fae5;color:#065f46}.dc-nesa{background:#ffedd5;color:#9a3412}
 .filter-bar{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:11px;padding:10px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.04);flex-wrap:wrap}
 .filter-bar-label{font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
 .filter-active{background:var(--al);color:#1a7fd4;border-color:#b3d4ef;font-weight:700}
@@ -246,6 +246,8 @@ td:nth-child(2),td:nth-child(3){text-align:left}
           <option value="dr. Wilson Wijaya">dr. Wilson Wijaya</option>
           <option value="dr. Putu Sastika Adiningtyas">dr. Putu Sastika Adiningtyas</option>
           <option value="dr. Aenun Azki Yainayati">dr. Aenun Azki Yainayati</option>
+          <option value="dr. Hendroe Widyanata">dr. Hendroe Widyanata</option>
+          <option value="dr. I Komang Nesa Trianta">dr. I Komang Nesa Trianta</option>
         </select>
       </div>
       <div style="display:flex;align-items:flex-end">
@@ -299,6 +301,8 @@ td:nth-child(2),td:nth-child(3){text-align:left}
           <option value="dr. Wilson Wijaya">dr. Wilson</option>
           <option value="dr. Putu Sastika Adiningtyas">dr. Putu</option>
           <option value="dr. Aenun Azki Yainayati">dr. Aenun</option>
+          <option value="dr. Hendroe Widyanata">dr. Hendroe</option>
+          <option value="dr. I Komang Nesa Trianta">dr. Nesa</option>
         </select>
         <select class="fsel" id="filterScore" onchange="renderTable()">
           <option value="">Semua Skor</option>
@@ -352,12 +356,14 @@ var FIELDS  = ['loc','onset','chron','qual','sev','agg','other','funda'];
 var FIELD_LABELS = ['Localization','Onset','Chronology','Quality','Severity','Agg/All Factors','Other Manifestations','Funda 4'];
 var DOCTORS = [
   'dr. Ade Sithanaya Miyardi','dr. I Wayan Budhi Sanjaya',
-  'dr. Wilson Wijaya','dr. Putu Sastika Adiningtyas','dr. Aenun Azki Yainayati'
+  'dr. Wilson Wijaya','dr. Putu Sastika Adiningtyas','dr. Aenun Azki Yainayati',
+  'dr. Hendroe Widyanata','dr. I Komang Nesa Trianta'
 ];
 var DR_CLASS = {
   'dr. Ade Sithanaya Miyardi':'dc-ade','dr. I Wayan Budhi Sanjaya':'dc-wayan',
   'dr. Wilson Wijaya':'dc-wilson','dr. Putu Sastika Adiningtyas':'dc-putu',
-  'dr. Aenun Azki Yainayati':'dc-aenun'
+  'dr. Aenun Azki Yainayati':'dc-aenun','dr. Hendroe Widyanata':'dc-hendroe',
+  'dr. I Komang Nesa Trianta':'dc-nesa'
 };
 
 // ── API Helpers ────────────────────────────────────────────────
@@ -653,37 +659,66 @@ var _deferredPrompt = null;
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('./sw.js')
-      .then(function(reg) {
-        console.log('[PWA] Service Worker registered:', reg.scope);
-      })
-      .catch(function(err) {
-        console.warn('[PWA] Service Worker registration failed:', err);
-      });
+      .then(function(reg) { console.log('[PWA] SW registered:', reg.scope); })
+      .catch(function(err) { console.warn('[PWA] SW failed:', err); });
   });
 }
 
-// Tangkap event install (muncul di Chrome/Edge/Android)
+// Deteksi apakah sudah diinstall sebagai PWA
+function isInstalledPWA() {
+  return window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+}
+
+// Deteksi iOS Safari
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+}
+
+// Tampilkan/sembunyikan tombol install
+function updateInstallBtn() {
+  var btn = document.getElementById('installBtn');
+  if (isInstalledPWA()) {
+    btn.style.display = 'none'; // sudah terinstall
+  } else {
+    btn.style.display = 'inline-flex'; // selalu tampilkan
+  }
+}
+
+// Tangkap event install (Chrome/Edge/Android)
 window.addEventListener('beforeinstallprompt', function(e) {
   e.preventDefault();
   _deferredPrompt = e;
-  document.getElementById('installBtn').style.display = 'inline-flex';
+  updateInstallBtn();
   console.log('[PWA] Install prompt ready');
+});
+
+// Jalankan cek saat load
+window.addEventListener('load', function() {
+  updateInstallBtn();
 });
 
 // Tombol Install App diklik
 function installPWA() {
-  if (!_deferredPrompt) {
-    toast('ℹ️ Buka di Chrome/Edge untuk install, atau gunakan menu browser → "Add to Home Screen"', '#1a7fd4');
+  // Chrome/Edge/Android — ada native prompt
+  if (_deferredPrompt) {
+    _deferredPrompt.prompt();
+    _deferredPrompt.userChoice.then(function(result) {
+      if (result.outcome === 'accepted') {
+        toast('✅ App berhasil diinstall!', '#16a34a');
+        document.getElementById('installBtn').style.display = 'none';
+      }
+      _deferredPrompt = null;
+    });
     return;
   }
-  _deferredPrompt.prompt();
-  _deferredPrompt.userChoice.then(function(result) {
-    if (result.outcome === 'accepted') {
-      toast('✅ App berhasil diinstall!', '#16a34a');
-      document.getElementById('installBtn').style.display = 'none';
-    }
-    _deferredPrompt = null;
-  });
+  // iOS Safari — panduan manual
+  if (isIOS()) {
+    toast('📱 iOS: Tap ikon Share (□↑) → "Add to Home Screen"', '#1a7fd4');
+    return;
+  }
+  // Browser lain (Firefox, dll)
+  toast('💡 Buka di Chrome/Edge lalu cari ikon install (⊕) di address bar', '#1a7fd4');
 }
 
 // Sembunyikan tombol install setelah app terinstall
