@@ -856,17 +856,24 @@ function dismissInstallBanner() {
 // Tombol "Install Sekarang"
 function triggerInstallBanner() {
   if (_deferredPrompt) {
-    hideBanner();
-    _deferredPrompt.prompt();
-    _deferredPrompt.userChoice.then(function(choice) {
+    // Simpan referensi lokal & reset global DULU sebelum prompt
+    var prompt = _deferredPrompt;
+    _deferredPrompt = null;
+
+    // Tampilkan native install dialog DULU, baru sembunyikan banner
+    prompt.prompt();
+    prompt.userChoice.then(function(choice) {
       if (choice.outcome === 'accepted') {
         localStorage.setItem('pwa-installed', '1');
         toast('✅ Instalasi diterima!', '#16a34a');
+      } else {
+        // User cancel — kembalikan prompt agar bisa dicoba lagi
+        _deferredPrompt = prompt;
       }
-      _deferredPrompt = null;
+      hideBanner(); // sembunyikan banner setelah user membuat pilihan
     });
   } else {
-    // Fallback — panduan manual
+    // Fallback — panduan manual (iOS Safari tidak support beforeinstallprompt)
     hideBanner();
     toast('💡 Buka menu browser (⋮) lalu pilih "Tambahkan ke layar utama"', '#1a7fd4');
   }
@@ -896,16 +903,6 @@ if ('serviceWorker' in navigator) {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.addEventListener('message', function(e) {
     if (e.data && e.data.type === 'SW_UPDATED') {
-      toast('🔄 App diperbarui ke versi terbaru!', '#1a7fd4');
-    }
-  });
-}
-
-
-// Dengarkan pesan dari Service Worker (misalnya ada update)
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.addEventListener('message', function(event) {
-    if (event.data && event.data.type === 'SW_UPDATED') {
       toast('🔄 App diperbarui ke versi terbaru!', '#1a7fd4');
     }
   });
