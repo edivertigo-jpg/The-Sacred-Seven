@@ -528,7 +528,28 @@ async function refreshData() {
     if (res.success) {
       allData = res.data.map(function(r){
         r.tanggal = normTgl(r.tanggal);
-        r.rm = (r.rm == null || r.rm === undefined) ? '' : String(r.rm).trim();
+        // No.RM kadang terbaca sebagai Date oleh Google Sheets — paksa jadi string bersih
+        if (r.rm == null || r.rm === undefined) {
+          r.rm = '';
+        } else {
+          var rawRm = r.rm;
+          // Kalau berupa objek Date, ambil jam:menit:detik saja (format asli RM xx.xx.xx)
+          if (rawRm instanceof Date) {
+            var hh = String(rawRm.getHours()).padStart(2,'0');
+            var mm = String(rawRm.getMinutes()).padStart(2,'0');
+            var ss = String(rawRm.getSeconds()).padStart(2,'0');
+            r.rm = hh + '.' + mm + '.' + ss;
+          } else {
+            var strRm = String(rawRm).trim();
+            // Kalau Google Sheets kirim dalam format "Tue Aug 14 1973 ..." tangkap jam:menit:detik
+            var timeMatch = strRm.match(/(\d{2}):(\d{2}):(\d{2})/);
+            if (timeMatch) {
+              r.rm = timeMatch[1] + '.' + timeMatch[2] + '.' + timeMatch[3];
+            } else {
+              r.rm = strRm;
+            }
+          }
+        }
         return r;
       });
       updateAll();
