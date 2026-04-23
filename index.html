@@ -198,10 +198,6 @@ td:nth-child(2),td:nth-child(3){text-align:left}
       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
       Refresh
     </button>
-    <button class="btn btn-white" id="installBtn" onclick="installPWA()" style="display:none" title="Install sebagai App">
-      <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-      Install App
-    </button>
     <div id="offlinePill" style="display:none;align-items:center;gap:6px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(220,38,38,.2);color:#fff;border:1px solid rgba(255,255,255,.25)">
       <div style="width:6px;height:6px;border-radius:50%;background:#f87171"></div>
       Offline
@@ -341,6 +337,30 @@ td:nth-child(2),td:nth-child(3){text-align:left}
     </div>
   </div>
 </div>
+<!-- ═══ PWA Install Popup ═══════════════════════════════════ -->
+<div id="installPopup" style="
+  display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  z-index:9998;background:#fff;border:1px solid #cce4f7;border-radius:16px;
+  padding:18px 22px;box-shadow:0 8px 40px rgba(15,41,66,.18);
+  width:calc(100% - 48px);max-width:420px;
+  animation:slideUp .35s cubic-bezier(.34,1.56,.64,1)">
+  <style>@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(30px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}</style>
+  <div style="display:flex;align-items:center;gap:14px">
+    <img src="icons/icon-72x72.png" style="width:48px;height:48px;border-radius:12px;flex-shrink:0">
+    <div style="flex:1;min-width:0">
+      <div style="font-size:13px;font-weight:700;color:#0f2942;margin-bottom:2px">Install IMU Monitor</div>
+      <div style="font-size:11px;color:#6b8ba4;line-height:1.4">Tambahkan ke layar utama untuk akses cepat tanpa buka browser</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:14px">
+    <button onclick="dismissInstall()" style="flex:1;padding:9px;border-radius:8px;border:1px solid #cce4f7;background:#f4faff;color:#6b8ba4;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer">Nanti</button>
+    <button onclick="doInstall()" style="flex:2;padding:9px;border-radius:8px;border:none;background:#1a7fd4;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer">
+      ⬇ Install Sekarang
+    </button>
+  </div>
+</div>
+<!-- ══════════════════════════════════════════════════════════ -->
+
 <div id="toast"></div>
 
 <script>
@@ -651,9 +671,10 @@ function toast(msg, color) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-//  PWA: Service Worker Registration + Install Prompt
+//  PWA: Service Worker + Auto Install Popup
 // ═══════════════════════════════════════════════════════════════
 var _deferredPrompt = null;
+var INSTALL_DISMISSED_KEY = 'imu_install_dismissed_until';
 
 // Register Service Worker
 if ('serviceWorker' in navigator) {
@@ -664,68 +685,73 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Deteksi apakah sudah diinstall sebagai PWA
 function isInstalledPWA() {
   return window.matchMedia('(display-mode: standalone)').matches
     || window.navigator.standalone === true;
 }
 
-// Deteksi iOS Safari
-function isIOS() {
-  return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+// Cek apakah popup boleh ditampilkan
+// — belum diinstall, dan belum dismiss dalam 24 jam terakhir
+function canShowInstallPopup() {
+  if (isInstalledPWA()) return false;
+  var until = localStorage.getItem(INSTALL_DISMISSED_KEY);
+  if (until && Date.now() < parseInt(until)) return false;
+  return true;
 }
 
-// Tampilkan/sembunyikan tombol install
-function updateInstallBtn() {
-  var btn = document.getElementById('installBtn');
-  if (isInstalledPWA()) {
-    btn.style.display = 'none'; // sudah terinstall
-  } else {
-    btn.style.display = 'inline-flex'; // selalu tampilkan
-  }
+function showInstallPopup() {
+  if (!canShowInstallPopup()) return;
+  // Tunda sedikit agar halaman sudah load dulu
+  setTimeout(function() {
+    document.getElementById('installPopup').style.display = 'block';
+  }, 1500);
 }
 
-// Tangkap event install (Chrome/Edge/Android)
-window.addEventListener('beforeinstallprompt', function(e) {
-  e.preventDefault();
-  _deferredPrompt = e;
-  updateInstallBtn();
-  console.log('[PWA] Install prompt ready');
-});
+// Tombol "Nanti" — simpan timestamp, popup muncul lagi kunjungan berikutnya
+// (tepatnya setelah 24 jam, supaya tidak spam tiap kunjungan)
+function dismissInstall() {
+  document.getElementById('installPopup').style.display = 'none';
+  // Muncul lagi setelah 24 jam
+  localStorage.setItem(INSTALL_DISMISSED_KEY, Date.now() + 24*60*60*1000);
+}
 
-// Jalankan cek saat load
-window.addEventListener('load', function() {
-  updateInstallBtn();
-});
-
-// Tombol Install App diklik
-function installPWA() {
-  // Chrome/Edge/Android — ada native prompt
+// Tombol "Install Sekarang"
+function doInstall() {
+  document.getElementById('installPopup').style.display = 'none';
   if (_deferredPrompt) {
     _deferredPrompt.prompt();
     _deferredPrompt.userChoice.then(function(result) {
       if (result.outcome === 'accepted') {
-        toast('✅ App berhasil diinstall!', '#16a34a');
-        document.getElementById('installBtn').style.display = 'none';
+        localStorage.removeItem(INSTALL_DISMISSED_KEY);
+        toast('✅ IMU Monitor berhasil diinstall!', '#16a34a');
       }
       _deferredPrompt = null;
     });
-    return;
+  } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+    toast('📱 Tap ikon Share (□↑) di Safari → "Add to Home Screen"', '#1a7fd4');
+  } else {
+    toast('💡 Klik ikon ⊕ di address bar browser untuk install', '#1a7fd4');
   }
-  // iOS Safari — panduan manual
-  if (isIOS()) {
-    toast('📱 iOS: Tap ikon Share (□↑) → "Add to Home Screen"', '#1a7fd4');
-    return;
-  }
-  // Browser lain (Firefox, dll)
-  toast('💡 Buka di Chrome/Edge lalu cari ikon install (⊕) di address bar', '#1a7fd4');
 }
 
-// Sembunyikan tombol install setelah app terinstall
+// Tangkap event dari browser (Chrome/Edge/Android)
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  _deferredPrompt = e;
+  showInstallPopup();
+});
+
+// Untuk iOS — tidak ada beforeinstallprompt, munculkan popup manual
+window.addEventListener('load', function() {
+  if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream) {
+    showInstallPopup();
+  }
+});
+
+// Setelah diinstall, hapus flag dismiss
 window.addEventListener('appinstalled', function() {
-  document.getElementById('installBtn').style.display = 'none';
-  _deferredPrompt = null;
-  toast('✅ IMU Monitor sudah terinstall sebagai App!', '#16a34a');
+  localStorage.removeItem(INSTALL_DISMISSED_KEY);
+  toast('✅ IMU Monitor sudah terinstall!', '#16a34a');
 });
 
 // Deteksi online/offline
