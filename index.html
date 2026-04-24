@@ -135,6 +135,8 @@ td:nth-child(2),td:nth-child(3){text-align:left}
 .dc-ade{background:#dbeafe;color:#1d4ed8}.dc-wayan{background:#dcfce7;color:#15803d}
 .dc-wilson{background:#fce7f3;color:#9d174d}.dc-putu{background:#fef9c3;color:#92400e}
 .dc-aenun{background:#ede9fe;color:#6d28d9}.dc-hendroe{background:#d1fae5;color:#065f46}.dc-nesa{background:#ffedd5;color:#9a3412}
+.dc-santika{background:#e0f2fe;color:#0369a1}.dc-asmara{background:#f0fdf4;color:#166534}.dc-sagung{background:#fdf4ff;color:#7e22ce}.dc-desak{background:#fff1f2;color:#be123c}
+.dc-santika{background:#e0f2fe;color:#0369a1}.dc-asmara{background:#f0fdf4;color:#166534}.dc-sagung{background:#fdf4ff;color:#7e22ce}.dc-desak{background:#fff1f2;color:#be123c}
 .score-cell{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:48px}
 .score-num{font-family:'DM Mono',monospace;font-size:11px;font-weight:700}
 .score-bg{width:40px;height:4px;background:#e2eef8;border-radius:4px;overflow:hidden}
@@ -346,6 +348,10 @@ td:nth-child(2),td:nth-child(3){text-align:left}
           <option value="dr. Aenun Azki Yainayati">dr. Aenun Azki Yainayati</option>
           <option value="dr. Hendroe Widyanata">dr. Hendroe Widyanata</option>
           <option value="dr. I Komang Nesa Trianta">dr. I Komang Nesa Trianta</option>
+          <option value="dr. I Made Santika">dr. I Made Santika</option>
+          <option value="dr. I Komang Asmara Putra">dr. I Komang Asmara Putra</option>
+          <option value="dr. Anak Agung Sagung Ania Utami Dewi">dr. Anak Agung Sagung Ania Utami Dewi</option>
+          <option value="dr. Desak Diah Savitri">dr. Desak Diah Savitri</option>
         </select>
       </div>
       <div style="display:flex;align-items:flex-end">
@@ -401,6 +407,10 @@ td:nth-child(2),td:nth-child(3){text-align:left}
           <option value="dr. Aenun Azki Yainayati">dr. Aenun</option>
           <option value="dr. Hendroe Widyanata">dr. Hendroe</option>
           <option value="dr. I Komang Nesa Trianta">dr. Nesa</option>
+          <option value="dr. I Made Santika">dr. Santika</option>
+          <option value="dr. I Komang Asmara Putra">dr. Asmara</option>
+          <option value="dr. Anak Agung Sagung Ania Utami Dewi">dr. Sagung</option>
+          <option value="dr. Desak Diah Savitri">dr. Desak</option>
         </select>
         <select class="fsel" id="filterScore" onchange="renderTable()">
           <option value="">Semua Skor</option>
@@ -472,13 +482,17 @@ var FIELD_LABELS = ['Localization','Onset','Chronology','Quality','Severity','Ag
 var DOCTORS = [
   'dr. Ade Sithanaya Miyardi','dr. I Wayan Budhi Sanjaya',
   'dr. Wilson Wijaya','dr. Putu Sastika Adiningtyas','dr. Aenun Azki Yainayati',
-  'dr. Hendroe Widyanata','dr. I Komang Nesa Trianta'
+  'dr. Hendroe Widyanata','dr. I Komang Nesa Trianta',
+  'dr. I Made Santika','dr. I Komang Asmara Putra',
+  'dr. Anak Agung Sagung Ania Utami Dewi','dr. Desak Diah Savitri'
 ];
 var DR_CLASS = {
   'dr. Ade Sithanaya Miyardi':'dc-ade','dr. I Wayan Budhi Sanjaya':'dc-wayan',
   'dr. Wilson Wijaya':'dc-wilson','dr. Putu Sastika Adiningtyas':'dc-putu',
   'dr. Aenun Azki Yainayati':'dc-aenun','dr. Hendroe Widyanata':'dc-hendroe',
-  'dr. I Komang Nesa Trianta':'dc-nesa'
+  'dr. I Komang Nesa Trianta':'dc-nesa',
+  'dr. I Made Santika':'dc-santika','dr. I Komang Asmara Putra':'dc-asmara',
+  'dr. Anak Agung Sagung Ania Utami Dewi':'dc-sagung','dr. Desak Diah Savitri':'dc-desak'
 };
 
 // ── API Helpers ────────────────────────────────────────────────
